@@ -41,7 +41,11 @@ if __name__ == '__main__':
     psis = [psi[0] for psi in filters['psi']]
     lp_sum = littlewood_paley_sum(phi, psis, J)
     bandwidth = 2*sigma_fourier*math.sqrt(math.log(2))
-    print(littlewood_paley_condition(lp_sum))
+    all_elems_lq_one, epsilon, average_epsilon = littlewood_paley_condition(lp_sum)
+    print("LP condition satisfied: ", all_elems_lq_one)
+    print("with epsilon:", epsilon)
+    print("average epsilon:", average_epsilon)
     print("bandwidth of mother wavelet:", bandwidth)
     print("bandwidth radians:", (bandwidth/x)*2*np.pi)
+    print("Complete lp sum:")
     print(lp_sum)
