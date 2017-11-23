@@ -20,12 +20,12 @@ def littlewood_paley_condition(lp_sum):
     return all_elems_lq_one, epsilon, average_epsilon
 
 if __name__ == '__main__':
-    x = y = z = 16
+    x = y = z = 128
     dimensions = np.array([x, y, z])
-    js = [0, 1, 2, 3]
+    js = [0, 1, 2, 3, 4, 5]
     J = js[-1]
     n_points_fourier_sphere = 30
-    sigma_spatial = 0.0913
+    sigma_spatial = 0.0118
     sigma_fourier = 1/sigma_spatial
     xi_radians = 4*np.pi/5
     xi = np.array([x*xi_radians/(2*np.pi), 0., 0.])
