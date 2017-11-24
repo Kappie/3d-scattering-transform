@@ -20,12 +20,13 @@ def littlewood_paley_condition(lp_sum):
     return all_elems_lq_one, epsilon, average_epsilon
 
 if __name__ == '__main__':
-    x = y = z = 128
+    x = z = 128
+    y = 256
     dimensions = np.array([x, y, z])
-    js = [0, 1, 2, 3, 4, 5]
+    js = [0, 1, 2, 3, 4]
     J = js[-1]
-    n_points_fourier_sphere = 30
-    sigma_spatial = 0.0118
+    n_points_fourier_sphere = 20
+    sigma_spatial = 0.0129
     sigma_fourier = 1/sigma_spatial
     xi_radians = 4*np.pi/5
     xi = np.array([x*xi_radians/(2*np.pi), 0., 0.])
@@ -47,5 +48,5 @@ if __name__ == '__main__':
     print("average epsilon:", average_epsilon)
     print("bandwidth of mother wavelet:", bandwidth)
     print("bandwidth radians:", (bandwidth/x)*2*np.pi)
-    print("Complete lp sum:")
+    print("complete lp sum:")
     print(lp_sum)

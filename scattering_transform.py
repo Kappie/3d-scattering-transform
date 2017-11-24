@@ -1,18 +1,18 @@
 import numpy as np
 import tensorflow as tf
-import scipy.fftpack as fft
+import scipy.fftpack
 import time
 import os
 
-from plot_slices import plot3d
+from plot_utils import plot3d
 from scipy.special import binom
 from numpy.lib.format import open_memmap
 
-from wavelets import filter_bank, SIGMA_DEFAULT, XI_DEFAULT
-from my_utils import abs_after_convolve, extract_scattering_coefficients
+from filter_bank import filter_bank
+from my_utils import apply_wavelet, extract_scattering_coefficients
 
 
-def apply_scattering_transform_to_dataset(images, js, J, L, output_location, sigma=SIGMA_DEFAULT, xi=XI_DEFAULT):
+def apply_scattering_transform_to_dataset(images, js, J, n_points_fourier_sphere, output_location, sigma, xi):
     """
     images: images in n_samples x width x height x depth format.
     js: length scales for filters. Filters will be dilated by 2**j for j in js.
@@ -24,13 +24,16 @@ def apply_scattering_transform_to_dataset(images, js, J, L, output_location, sig
     global scan_nr
 
     n_samples, width, height, depth = images.shape
+    dimensions = np.array([width, height, depth])
+    n_transforms = number_of_transforms(js, n_points_fourier_sphere)
     coefficients = open_memmap(
         output_location, dtype=np.float32, mode="w+",
-        shape=(n_samples, number_of_transforms(js, L), width//2**J, height//2**J, depth//2**J))
+        shape=(n_samples, n_transforms, width//2**J, height//2**J, depth//2**J))
 
+    print("Number of transforms per input image:", n_transforms)
     print("Making filter bank...")
     start = time.time()
-    filters = filter_bank(width, height, depth, js, J, L, sigma, xi=xi)
+    filters = filter_bank(dimensions, js, J, n_points_fourier_sphere, sigma, xi)
     end = time.time()
     print("Done in {}.".format(str(end - start)))
 
@@ -103,13 +106,13 @@ def scattering_transform(X, J, filters):
     return scattering_coefficients
 
 
-def number_of_transforms(js, L, m_max=2):
+def number_of_transforms(js, n_points_fourier_sphere, m_max=2):
     # original image is the first transform
     total = 1
     n_js = len(js)
 
     for m in range(1, m_max + 1):
-        total += L**(3*m) * int(binom(n_js, m))
+        total += n_points_fourier_sphere**m * int(binom(n_js, m))
 
     return total
 
