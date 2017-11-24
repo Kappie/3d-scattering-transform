@@ -56,23 +56,23 @@ def scattering_transform(X, J, filters):
 
     # save_transform_to_disk(X, {})
     X = X.astype(np.complex64)
+    X_fourier = scipy.fftpack.fftn(X)
     psis = filters['psi']
     phis = filters['phi']
     scattering_coefficients = []
     transforms = []
 
     # First low-pass filter: Extract zeroth order coefficients
-    zeroth_order_coefficients = extract_scattering_coefficients(X, phis[0], J)
+    zeroth_order_coefficients = extract_scattering_coefficients(X_fourier, phis[0], J)
     # save_transform_to_disk(zeroth_order_coefficients, {'J': J})
     scattering_coefficients.append(zeroth_order_coefficients)
 
     for n1 in range(len(psis)):
         j1 = psis[n1]['j']
-        alpha1, beta1, gamma1 = psis[n1]['alpha'], psis[n1]['beta'], psis[n1]['gamma']
 
         # Calculate wavelet transform and apply modulus. Signal can be downsampled at 2**j1 without losing much energy.
         # See Bruna (2013).
-        transform1 = abs_after_convolve(X, psis[n1][0], j1)
+        transform1 = apply_wavelet(X, psis[n1][0], j1)
         # save_transform_to_disk(transform1.astype(np.float32), {'j1': j1, 'alpha': alpha1, 'beta': beta1, 'gamma': gamma1})
 
         # Second low-pass filter: Extract first order coefficients.
@@ -84,12 +84,11 @@ def scattering_transform(X, J, filters):
 
         for n2 in range(len(psis)):
             j2 = psis[n2]['j']
-            alpha2, beta2, gamma2 = psis[n2]['alpha'], psis[n2]['beta'], psis[n2]['gamma']
             if j1 < j2:
                 # transform1 is already downsampled at 2**j1, so we take the wavelet that is downsampled at the same
                 # factor.
                 # We can downsample transform2 at 2**j2, so here it remains to downsample with the factor 2**(j2-j1).
-                transform2 = abs_after_convolve(transform1, psis[n2][j1], j2 - j1)
+                transform2 = apply_wavelet(transform1, psis[n2][j1], j2 - j1)
                 # save_transform_to_disk(transform2.astype(np.float32), {'j1': j1, 'alpha': alpha1, 'beta': beta1, 'gamma': gamma1, 'j2': j2, 'alpha2': alpha2, 'beta2': beta2, 'gamma2': gamma2})
 
                 # Third low-pass filter. Extract second-order coefficients.

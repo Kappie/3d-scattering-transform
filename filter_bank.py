@@ -31,18 +31,24 @@ def filter_bank(dimensions, js, J, n_points_fourier_sphere, sigma, xi):
     for j, r in product(js, rotation_matrices):
         psi = {'j': j, 'r': r}
         psi_signal_fourier = morlet_fourier_3d_gpu(dimensions, j, r, xi, sigma)
-        # When j_1 < j_2 < ... < j_n, we need j_2, ..., j_n downsampled at j_1, j_3, ..., j_n downsampled at j_2, etc.
-        # resolution 0 is just the signal itself. See below header "Fast scattering computation" in Bruna (2013).
-        for resolution in range(j + 1):
-            psi_signal_fourier_res = crop_freq_3d(psi_signal_fourier, resolution)
-            psi[resolution] = psi_signal_fourier_res
-
+        # Zeroth resolution is signal itself.
+        psi[0] = psi_signal_fourier
         filters['psi'].append(psi)
 
     # Normalize by making sure the raw Littlewood-Paley sum is bounded from above by 1.0.
     # We downsample the LP sum by 2**J to save computation.
-    filters['psi'] = normalize_psis(filters['psi'], J)
+    filters['psi'], normalisation_factor = normalize_psis(filters['psi'], J)
 
+    # Store downsampled versions of the psis.
+    for idx, psi in enumerate(filters['psi']):
+        j = psi['j']
+        # When j_1 < j_2 < ... < j_n, we need j_2, ..., j_n downsampled at j_1, j_3, ..., j_n downsampled at j_2, etc.
+        # See below header "Fast scattering computation" in Bruna (2013).
+        for resolution in range(1, j + 1):
+            psi_signal_fourier_res = crop_freq_3d(psi[0], resolution)
+            psi[resolution] = psi_signal_fourier_res
+
+    # Low-pass filter.
     filters['phi'] = {}
     filters['phi']['j'] = J
     phi_signal_fourier = gaussian_filter_3d(dimensions, J, sigma)
@@ -61,8 +67,6 @@ def normalize_psis(psis, resolution):
     (Actually only works if maximum of LP sum is larger than 1.0.)
     psis: list of psi wavelets (dicts with meta-information and the actual filters and downsampled versions.)
     """
-    # TODO: I only normalize the original (undownsampled) filters. I don't know how to actually implement
-    # downsampling in the correct way!!
     psis_original = [psi[0] for psi in psis]
     raw_lp_sum = raw_littlewood_paley_sum(psis_original, resolution)
     largest_element = np.max(raw_lp_sum)
@@ -74,7 +78,7 @@ def normalize_psis(psis, resolution):
         psi[0] = psis_original_normalized[i]
         result.append(psi)
 
-    return result
+    return result, largest_element
 
 
 @numba.jit
