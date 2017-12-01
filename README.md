@@ -1,4 +1,4 @@
-Dear Vincent,
+# 3D scattering transform
 
 To install a fresh environment to run the code, do
 
@@ -6,8 +6,20 @@ To install a fresh environment to run the code, do
 conda create --name myenv --file spec-file.txt
 ```
 
-The important code is in `filter_bank.py` and I check if the Littlewood-Paley condition
-is satisfied in `littlewood_paley_condition.py`. Running the latter file gives output like:
+## Running the 3D scattering transform
+
+Example code is in `perform_scattering_on_dataset.py`. Image data should be
+saved in a numpy-compatible format with dimensions `n_samples x width x height x depth`, where `width`, `height`
+and `depth` are all powers of 2. Output gets saved automatically to generated file name.
+
+## Classification
+
+Example code is in `classify_ct_scans.py`.
+
+## Checking the Littlewood-Paley condition
+
+Example code is in `littlewood_paley_condition.py`. The filter bank is contructed in `filter_bank.py`.
+Running `littlewood_paley_condition.py` gives output like:
 
 ```
 making filter bank...
@@ -41,3 +53,8 @@ Complete lp sum:
 ```
 
 This is after tuning `sigma` to get close to optimal in terms of how small `epsilon` is for a 128x128x128 filter bank.
+
+## Visualisation
+
+It is possible to get a heat map of original pixels that are important for the classification. Example code is in
+`visualisation_gradient.py`

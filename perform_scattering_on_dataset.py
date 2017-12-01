@@ -2,9 +2,6 @@ import numpy as np
 import datetime
 import os
 
-
-from collections import namedtuple
-
 from scattering_transform import apply_scattering_transform_to_dataset
 
 

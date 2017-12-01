@@ -61,6 +61,27 @@ def classify(dataset, labels):
     return classifier
 
 
+def classify_single_svm(dataset, labels):
+    C = 10
+    gamma = 1e-5
+    kernel = 'rbf'
+
+    test_size = 0.2
+    score_function = sklearn.metrics.accuracy_score
+
+    normalize(dataset)
+    X_train, X_test, y_train, y_test = train_test_split(dataset, labels, test_size=test_size, shuffle=True)
+    classifier = SVC()
+    classifier.fit(X_train, y_train)
+
+    y_pred = classifier.predict(X_test)
+
+    print("accuracy on test set:", score_function(y_test, y_pred))
+    print(sklearn.metrics.confusion_matrix(y_test, y_pred))
+
+    return classifier
+
+
 
 def normalize(dataset):
     # Same as in Bruna's thesis.
@@ -87,9 +108,9 @@ if __name__ == '__main__':
     UNAFFECTED = -1
 
     # This is how I now load coefficients:
-    scattering_coefficients_path = r"F:\GEERT\results\js0-3_J6_L3_sigma5_2017-11-10_17-05-55.dat"
+    scattering_coefficients_path = r"F:\GEERT\results\js0-5_J5_npointsfourier20_sigma0.0129_2017-11-24_17-50-25.dat"
     scattering_coefficients = open_memmap(scattering_coefficients_path)
-    max_n_samples_class = 200
+    max_n_samples_class = 150
 
     n_samples, n_transforms, width, height, depth = scattering_coefficients.shape
     # By convention, we always choose the same number of samples of each class, where all the affected
@@ -104,4 +125,4 @@ if __name__ == '__main__':
     scattering_coefficients = scattering_coefficients[np.r_[:n_samples_class, -n_samples_class:0]]
     print(scattering_coefficients.shape)
     print(labels.shape)
-    classify(scattering_coefficients, labels)
+    classify_single_svm(scattering_coefficients, labels)
