@@ -56,5 +56,6 @@ This is after tuning `sigma` to get close to optimal in terms of how small `epsi
 
 ## Visualisation
 
-It is possible to get a heat map of original pixels that are important for the classification. Example code is in
-`visualisation_gradient.py`
+It is possible to get a heat map of original pixels that are important for the
+classification (method from Adel et al 2017). Example code is in
+`visualisation_gradient.py`.
